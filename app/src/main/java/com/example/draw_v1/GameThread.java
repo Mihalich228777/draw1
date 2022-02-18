@@ -36,8 +36,6 @@ public class GameThread extends Thread{
 
 
         processEnemy.spawnEnemy();
-        enemyList = processEnemy.getEnemyList();
-        bulletList = processBullets.getBulletsList();
         processEnemy.processSpeed();
         processEnemy.start();
         processBullets.start();
@@ -65,14 +63,25 @@ public class GameThread extends Thread{
     }
 
 
-        //float distance = (float) Math.sqrt(Math.pow(bullet.getX() - enemy.getX() ,2) + Math.pow(bullet.getY() - enemy.getY() ,2));
+
+    private synchronized void  bulletProcessColision(bullet bullet){
+        for (int i = 0; i < enemyList.size(); i++) {
+            enemy enemy = enemyList.get(i);
+            float distance = (float) Math.sqrt(Math.pow(bullet.getX() - enemy.getX() ,2) + Math.pow(bullet.getY() - enemy.getY() ,2));
+            if(distance < enemy.getRadius() + bullet.getRadius()){
+                processBullets.removeBullet(bullet);
+                enemyList.remove(enemy);
+            }
+        }
+
+    }
 
 
 // не получилось сделать колизию противника и пули
 
 
     @Override
-    public void run() {
+    public synchronized void run() {
         while(runnable){
             Canvas canvas = holder.lockCanvas();
             paint.setStyle(Paint.Style.FILL);
@@ -84,22 +93,29 @@ public class GameThread extends Thread{
                 enemy enemy = enemyList.get(i);
                 canvas.drawCircle(enemy.getX(), enemy.getY(), enemy.getRadius(), paint);
                 enemyProcessColision(enemy);
-            }         //понятие не имею как заменить этот цикл на foreach
-
-            //Math.sqrt(Math.pow(base.getY0() - enemyList.get(1).getY(), 2) + Math.pow(base.getX0() - enemyList.get(1).getX() ,2))
-            //canvas.drawText(String.valueOf(enemyList.size()), 300, 600, paint);
+                        //понятие не имею как заменить этот цикл на foreach
+            }
 
             for (int j = 0; j < bulletList.size(); j++) {
                 bullet bullet = bulletList.get(j);
                 canvas.drawCircle(bullet.getX(), bullet.getY(), bullet.getRadius(), paint);
+                bulletProcessColision(bullet);
+
+            }        //понятие не имею как заменить этот цикл на foreach
+
+            //Math.sqrt(Math.pow(base.getY0() - enemyList.get(1).getY(), 2) + Math.pow(base.getX0() - enemyList.get(1).getX() ,2))
+            //canvas.drawText(String.valueOf(enemyList.size()), 300, 600, paint);
 
 
-            }         //понятие не имею как заменить этот цикл на foreach
 
             paint.setTextSize(100);
             canvas.drawText(base.getHp() + "hp", 10, 100, paint);
 
             holder.unlockCanvasAndPost(canvas);
+
+            //обновляем списки
+            enemyList = processEnemy.getEnemyList();
+            bulletList = processBullets.getBulletsList();
         }
     }
 }

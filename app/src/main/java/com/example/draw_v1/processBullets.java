@@ -26,7 +26,10 @@ public class processBullets extends Thread{
     }
 
 
-
+    public void removeBullet(bullet bullet){
+        bulletList.remove(bullet);
+        index--;
+    }
 
     public float getGipoten(bullet bullet){
         return (float) Math.sqrt(Math.pow(bullet.getDx() - X0, 2) + Math.pow(bullet.getDy() - Y0, 2));
